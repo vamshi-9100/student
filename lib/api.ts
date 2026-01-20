@@ -1,12 +1,11 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://iotforai.com"
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
 
 const isBrowser = typeof window !== "undefined";
 
 const ACCESS_TOKEN_KEY = "iot-access-token";
 const REFRESH_TOKEN_KEY = "iot-refresh-token";
 const ACCESS_EXPIRY_KEY = "iot-access-expiry";
-const COMPANY_ID_KEY = "iot-selected-company-id";
-const CLIENT_ID_KEY = "iot-selected-client-id";
 
 export interface ApiError {
   message: string;
@@ -126,23 +125,6 @@ function resolveRefreshToken(options?: ApiRequestOptions): string | null {
 
   return getStoredValue(REFRESH_TOKEN_KEY);
 }
-
-function resolveCompanyId(options?: ApiRequestOptions): string | null {
-  if (options && options.includeCompanyId === false) {
-    return options.companyId ?? null;
-  }
-
-  return options?.companyId ?? getStoredValue(COMPANY_ID_KEY);
-}
-
-function resolveClientId(options?: ApiRequestOptions): string | null {
-  if (options && options.includeClientId === false) {
-    return options.clientId ?? null;
-  }
-
-  return options?.clientId ?? getStoredValue(CLIENT_ID_KEY);
-}
-
 function buildUrl(endpoint: string, options?: ApiRequestOptions): string {
   const baseUrl = `${API_BASE_URL}${endpoint}`;
   const url = new URL(baseUrl, "http://dummy-base");
@@ -154,21 +136,13 @@ function buildUrl(endpoint: string, options?: ApiRequestOptions): string {
     }
   });
 
-  const companyId = resolveCompanyId(options);
-  if (companyId && (options?.includeCompanyId ?? true)) {
-    url.searchParams.set("companyId", companyId);
-  }
-
-  const clientId = resolveClientId(options);
-  if (clientId && (options?.includeClientId ?? true)) {
-    url.searchParams.set("clientId", clientId);
-  }
-
   // The dummy base ensures correct relative handling; strip it before returning.
   return url.href.replace(url.origin, "");
 }
 
-async function refreshAccessToken(options?: ApiRequestOptions): Promise<string | null> {
+async function refreshAccessToken(
+  options?: ApiRequestOptions
+): Promise<string | null> {
   if (options?.skipAuth) {
     return null;
   }
@@ -239,8 +213,7 @@ async function refreshAccessToken(options?: ApiRequestOptions): Promise<string |
 async function parseJsonResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") ?? "";
   const isJson =
-    contentType.includes("application/json") ||
-    contentType.includes("+json");
+    contentType.includes("application/json") || contentType.includes("+json");
 
   if (!isJson) {
     await response.text(); // consume body to avoid locking the stream
@@ -259,7 +232,7 @@ async function makeRequest<TResponse, TRequest = unknown>(
   endpoint: string,
   body?: TRequest,
   options?: ApiRequestOptions,
-  retrying = false,
+  retrying = false
 ): Promise<TResponse> {
   const url = buildUrl(endpoint, options);
   const headers: Record<string, string> = {
@@ -272,16 +245,14 @@ async function makeRequest<TResponse, TRequest = unknown>(
     headers.Authorization = `Bearer ${accessToken}`;
   }
 
-  const companyId = resolveCompanyId(options);
-  // if (companyId && (options?.includeCompanyId ?? true)) {
-  //   headers["X-Company-Id"] = companyId;
-  // }
-
   try {
     const response = await fetch(`${API_BASE_URL}${url}`, {
       method,
       headers,
-      body: method === "GET" || method === "DELETE" ? undefined : JSON.stringify(body),
+      body:
+        method === "GET" || method === "DELETE"
+          ? undefined
+          : JSON.stringify(body),
       signal: options?.signal,
     });
 
@@ -301,7 +272,7 @@ async function makeRequest<TResponse, TRequest = unknown>(
           endpoint,
           body,
           { ...options, accessToken: refreshedToken },
-          true,
+          true
         );
       }
     }
@@ -310,7 +281,7 @@ async function makeRequest<TResponse, TRequest = unknown>(
     throw new ApiException(
       `API request failed: ${response.status} ${response.statusText}`,
       response.status,
-      errorText,
+      errorText
     );
   } catch (error) {
     if (error instanceof ApiException) {
@@ -318,23 +289,30 @@ async function makeRequest<TResponse, TRequest = unknown>(
     }
 
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new ApiException("Network error: Unable to connect to the API server");
+      throw new ApiException(
+        "Network error: Unable to connect to the API server"
+      );
     }
 
     throw new ApiException(
-      `Unexpected error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Unexpected error: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 }
 
-export async function apiGet<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
+export async function apiGet<T>(
+  endpoint: string,
+  options?: ApiRequestOptions
+): Promise<T> {
   return makeRequest<T>("GET", endpoint, undefined, options);
 }
 
 export async function apiPost<TResponse, TRequest>(
   endpoint: string,
   data: TRequest,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<TResponse> {
   return makeRequest<TResponse, TRequest>("POST", endpoint, data, options);
 }
@@ -342,14 +320,14 @@ export async function apiPost<TResponse, TRequest>(
 export async function apiPut<TResponse, TRequest>(
   endpoint: string,
   data: TRequest,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<TResponse> {
   return makeRequest<TResponse, TRequest>("PUT", endpoint, data, options);
 }
 
 export async function apiDelete<T>(
   endpoint: string,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<T> {
   return makeRequest<T>("DELETE", endpoint, undefined, options);
 }
@@ -370,6 +348,14 @@ export async function checkBackendHealth(): Promise<boolean> {
 }
 
 export const authStorage = {
+  getAccessToken(): string | null {
+    return getStoredValue(ACCESS_TOKEN_KEY);
+  },
+
+  getRefreshToken(): string | null {
+    return getStoredValue(REFRESH_TOKEN_KEY);
+  },
+
   setAccessToken(token: string | null, expiresInSeconds?: number | null) {
     setStoredValue(ACCESS_TOKEN_KEY, token);
     if (expiresInSeconds) {
@@ -379,20 +365,14 @@ export const authStorage = {
       setStoredValue(ACCESS_EXPIRY_KEY, null);
     }
   },
+
   setRefreshToken(token: string | null) {
     setStoredValue(REFRESH_TOKEN_KEY, token);
   },
-  setCompanyId(companyId: string | null) {
-    setStoredValue(COMPANY_ID_KEY, companyId);
-  },
-  setClientId(clientId: string | null) {
-    setStoredValue(CLIENT_ID_KEY, clientId);
-  },
+
   clear() {
     setStoredValue(ACCESS_TOKEN_KEY, null);
     setStoredValue(REFRESH_TOKEN_KEY, null);
     setStoredValue(ACCESS_EXPIRY_KEY, null);
-    setStoredValue(COMPANY_ID_KEY, null);
-    setStoredValue(CLIENT_ID_KEY, null);
   },
 };

@@ -11,12 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getTextSize } from "@/lib/text-sizes";
 import { useLanguage } from "@/contexts/language-context";
-import { useAppInit } from "@/contexts/app-init-context";
-import { useAuth } from "@/contexts/auth-context";
 import {
   LayoutDashboard,
+  Shield,
+  Lock,
   Activity,
-  Router,
   BarChart3,
   Map,
   Settings,
@@ -24,8 +23,6 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  List,
   X,
 } from "lucide-react";
 
@@ -40,57 +37,73 @@ export function DashboardSidebar({
   isMobileOpen,
   onMobileClose,
 }: DashboardSidebarProps) {
-  const { selectedCompany } = useAuth();
-  const { appName } = useAppInit();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const { t, isRTL } = useLanguage();
-  const appDisplayName =
-    appName ?? selectedCompany?.appName ?? selectedCompany?.name ?? "IoT Dashboard";
 
-  const navigation = [
+  const navigation: {
+    name: string;
+    href: string;
+    icon: any;
+    badge?: string;
+    submenu?: { name: string; href: string; icon: any }[];
+  }[] = [
+    { name: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("activities"), href: "/dashboard/activities", icon: Zap },
+    { name: t("attendence"), href: "/dashboard/attendence", icon: Activity },
     {
-      name: t("dashboard"),
-      href: "/dashboard",
-      icon: LayoutDashboard,
-      current: false,
-    },
-    {
-      name: t("gateways"),
-      href: "/dashboard/gateways",
-      icon: Zap,
-      current: false,
-    },
-    {
-      name: t("sensors"),
-      href: "/dashboard/sensors",
-      icon: Activity,
-      current: false,
-    },
-    {
-      name: t("charts"),
-      href: "/dashboard/charts",
+      name: t("biometing"),
+      href: "/dashboard/biometing",
       icon: BarChart3,
-      current: false,
     },
     {
-      name: t("maps"),
-      href: "/dashboard/maps",
+      name: t("bustracking"),
+      href: "/dashboard/bustracking",
       icon: Map,
-      current: false,
     },
+    { name: t("settings"), href: "/dashboard/settings", icon: Settings },
     {
-      name: t("rules"),
-      href: "/dashboard/rules",
-      icon: Settings,
-      current: false,
-    },
-    {
-      name: t("reports"),
-      href: "/dashboard/reports",
+      name: t("studentprofiles"),
+      href: "/dashboard/studentprofiles",
       icon: FileText,
-      current: false,
+    },
+    {
+      name: t("usermanagement"),
+      href: "/dashboard/usermanagement",
+      icon: FileText,
+      submenu: [
+        {
+          name: t("roles"),
+          href: "/dashboard/usermanagement/roles",
+          icon: Shield,
+        },
+        {
+          name: t("permissions"),
+          href: "/dashboard/usermanagement/permissions",
+          icon: Lock,
+        },
+        {
+          name: t("Role-Permissions"),
+          href: "/dashboard/usermanagement/rolepermissions",
+          icon: Lock,
+        },
+      ],
+    },
+    {
+      name: t("whatsupfeeds"),
+      href: "/dashboard/whatsupfeeds",
+      icon: FileText,
+    },
+    {
+      name: t("academicReports"),
+      href: "/dashboard/academicreport",
+      icon: FileText,
+    },
+    {
+      name: t("sectionManagement"),
+      href: "/dashboard/sectionManagement",
+      icon: FileText,
     },
   ];
 
@@ -119,16 +132,14 @@ export function DashboardSidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`flex items-center ${
-              isRTL ? "flex-row-reverse" : ""
-            }`}
+            className={`flex items-center ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <span
               className={`font-semibold text-gray-900 dark:text-white truncate ${getTextSize(
                 "navItem"
               )}`}
             >
-              {appDisplayName}
+              {"Stud System"}
             </span>
           </motion.div>
         )}
@@ -141,7 +152,7 @@ export function DashboardSidebar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onMobileClose}
+              onClick={() => onMobileClose?.()}
               className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <X className="h-4 w-4" />
@@ -156,14 +167,14 @@ export function DashboardSidebar({
             >
               {collapsed ? (
                 isRTL ? (
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight />
                 )
               ) : isRTL ? (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight />
               ) : (
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft />
               )}
             </Button>
           )}
@@ -225,7 +236,7 @@ export function DashboardSidebar({
                   ) : (
                     <Link
                       href={item.href}
-                      onClick={isMobile ? onMobileClose : undefined}
+                      onClick={() => isMobile && onMobileClose?.()}
                     >
                       <Button
                         variant="ghost"
@@ -286,7 +297,7 @@ export function DashboardSidebar({
                         <Link
                           key={subItem.name}
                           href={subItem.href}
-                          onClick={isMobile ? onMobileClose : undefined}
+                          onClick={() => isMobile && onMobileClose?.()}
                         >
                           <Button
                             variant="ghost"
@@ -325,7 +336,6 @@ export function DashboardSidebar({
             )} ${isRTL ? "text-right" : "text-left"}`}
           >
             <p>©2025 IOTforAI.com</p>
-            {/*<p>© 2025 {t("companyName")}</p>*/}
           </div>
         )}
       </div>
@@ -340,7 +350,7 @@ export function DashboardSidebar({
       </div>
 
       {/* Mobile Sidebar */}
-      <Sheet open={isMobileOpen} onOpenChange={onMobileClose}>
+      <Sheet open={!!isMobileOpen} onOpenChange={() => onMobileClose?.()}>
         <SheetContent side={isRTL ? "right" : "left"} className="p-0 w-80">
           <SidebarContent isMobile />
         </SheetContent>

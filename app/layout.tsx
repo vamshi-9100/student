@@ -5,8 +5,6 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
-import { AppInitProvider } from "@/contexts/app-init-context";
-import { AlertProvider } from "@/contexts/alert-context";
 import { Toaster } from "@/components/ui/toaster";
 import { DialogProvider } from "@/contexts/dialogContext";
 
@@ -29,14 +27,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <DialogProvider>
             <LanguageProvider>
-              <AppInitProvider>
-                <AuthProvider>
-                  <AlertProvider>
-                    {children}
-                    <Toaster />
-                  </AlertProvider>
-                </AuthProvider>
-              </AppInitProvider>
+              <AuthProvider>
+                {children}
+                <Toaster />
+              </AuthProvider>
             </LanguageProvider>
           </DialogProvider>
         </ThemeProvider>

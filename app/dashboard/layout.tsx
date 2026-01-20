@@ -1,25 +1,19 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Loader2, Zap, Shield, Globe, TrendingUp, Activity } from "lucide-react"
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
-import { DashboardHeader } from "@/components/layout/dashboard-header"
-import { useAuth } from "@/contexts/auth-context"
-import { useFCM } from "@/hooks/use-fcm"
-
-// Register service worker for Firebase Cloud Messaging
-if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-  navigator.serviceWorker
-    .register("/firebase-messaging-sw.js")
-    .then((registration) => {
-      console.log("✅ Service Worker registered for FCM:", registration.scope)
-    })
-    .catch((error) => {
-      console.warn("⚠️ Service Worker registration failed:", error)
-    })
-}
+import { useState, useEffect } from "react";
+import {
+  Loader2,
+  Zap,
+  Shield,
+  Globe,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { useAuth } from "@/contexts/auth-context";
 
 const loadingMessages = [
   {
@@ -47,51 +41,50 @@ const loadingMessages = [
     title: "Almost Ready",
     description: "Finalizing your personalized dashboard experience",
   },
-]
+];
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
-  const { isLoading, user } = useAuth()
-  const [isOnLoginPage, setIsOnLoginPage] = useState(false)
-  
-  // Initialize FCM globally to listen for notifications
-  useFCM()
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const { isLoading, user } = useAuth();
+  const [isOnLoginPage, setIsOnLoginPage] = useState(false);
 
   const handleMobileMenuClick = () => {
-    setIsMobileSidebarOpen(true)
-  }
+    setIsMobileSidebarOpen(true);
+  };
 
   const handleMobileSidebarClose = () => {
-    setIsMobileSidebarOpen(false)
-  }
+    setIsMobileSidebarOpen(false);
+  };
 
   // Check if we're on the login page
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const pathname = window.location.pathname
-      setIsOnLoginPage(pathname === "/login" || pathname.startsWith("/login/"))
+      const pathname = window.location.pathname;
+      setIsOnLoginPage(pathname === "/login" || pathname.startsWith("/login/"));
     }
-  }, [])
+  }, []);
 
   // Rotate through loading messages - start with random index on page refresh
-  useEffect(() => {
+  /*useEffect(() => {
     if (isLoading || !user) {
       // Start with a random message index for variety
-      setCurrentMessageIndex(Math.floor(Math.random() * loadingMessages.length))
+      setCurrentMessageIndex(
+        Math.floor(Math.random() * loadingMessages.length)
+      );
       const interval = setInterval(() => {
-        setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length)
-      }, 2000)
-      return () => clearInterval(interval)
+        setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 2000);
+      return () => clearInterval(interval);
     } else if (user) {
       // Reset message index when loading completes
-      setCurrentMessageIndex(0)
+      setCurrentMessageIndex(0);
     }
-  }, [isLoading, user])
+  }, [isLoading, user]);
 
   // Show loading screen while fetching user details after login
   if (isLoading || !user) {
@@ -114,12 +107,12 @@ export default function DashboardLayout({
             </div>
           </div>
         </div>
-      )
+      );
     }
 
     // Show loading messages only when actually loading (random start)
-    const currentMessage = loadingMessages[currentMessageIndex]
-    const Icon = currentMessage.icon
+    const currentMessage = loadingMessages[currentMessageIndex];
+    const Icon = currentMessage.icon;
 
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -152,13 +145,16 @@ export default function DashboardLayout({
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  }*/
 
   return (
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
-      <DashboardSidebar isMobileOpen={isMobileSidebarOpen} onMobileClose={handleMobileSidebarClose} />
+      <DashboardSidebar
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={handleMobileSidebarClose}
+      />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -169,5 +165,5 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

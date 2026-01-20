@@ -37,6 +37,25 @@ export const translations = {
     gettingLocation: "Getting location...",
     back: "Back",
     filter: "Filter",
+    //school
+    school: {
+      title: "School Dashboard",
+      subtitle: "Overview of students, fees and academics",
+
+      totalStudents: "Total Students",
+      pendingFees: "Pending Fees",
+      upcomingExams: "Upcoming Exams",
+      tomorrow: "Tomorrow",
+
+      academicPerformance: "Academic Performance",
+      attendance: "Attendance",
+
+      recentActivities: "Recent Activities",
+      exams: "Exams",
+      activities: "Activities",
+      holidays: "Holidays",
+      upcoming: "Upcoming",
+    },
 
     //company
     company: "Company",
@@ -1259,10 +1278,17 @@ export const translations = {
 };
 
 export type Language = keyof typeof translations;
-export type TranslationKey = keyof (typeof translations)["en"];
+export type TranslationKey = string;
+const getNestedValue = (obj: any, path: string): string | undefined => {
+  return path.split(".").reduce((acc, key) => acc?.[key], obj);
+};
 
-export const getTranslation = (lang: Language, key: TranslationKey): string => {
-  return translations[lang][key] || translations["en"][key];
+export const getTranslation = (lang: Language, key: string): string => {
+  return (
+    getNestedValue(translations[lang], key) ??
+    getNestedValue(translations.en, key) ??
+    key
+  );
 };
 
 export const isRTLLanguage = (language: Language): boolean => {
