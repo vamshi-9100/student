@@ -1,5 +1,5 @@
-"use client"
-
+"use client";
+/*
 import { useMemo, useState } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -313,5 +313,11 @@ export default function AccountPage() {
       </div>
     </div>
   )
+}*/
+export default function accountpage() {
+  return (
+    <>
+      <h1>accounts page</h1>
+    </>
+  );
 }
-
