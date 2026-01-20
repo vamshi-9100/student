@@ -1,4 +1,11 @@
 "use client";
+
+export const dynamic = "force-dynamic";
+
+export default function AccountPage() {
+  return <h1>Accounts page</h1>;
+}
+
 /*
 import { useMemo, useState } from "react"
 import { useAuth } from "@/contexts/auth-context"
@@ -314,10 +321,3 @@ export default function AccountPage() {
     </div>
   )
 }*/
-export default function accountpage() {
-  return (
-    <>
-      <h1>accounts page</h1>
-    </>
-  );
-}
